@@ -44,6 +44,22 @@ func (p *Program) String() string {
 	return out.String()
 }
 
+type Comment struct {
+	Token token.Token // '//'
+	Value string
+}
+
+func (c *Comment) statementNode()       {}
+func (c *Comment) TokenLiteral() string { return c.Token.Literal }
+func (c *Comment) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("//")
+	out.WriteString(c.Value)
+
+	return out.String()
+}
+
 type LetStatement struct {
 	Token token.Token // the token.LET token
 	Name  *Identifier

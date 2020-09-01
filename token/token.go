@@ -12,9 +12,10 @@ const (
 	EOF     = "EOF"
 
 	// Identifiers + literals
-	IDENT  = "IDENT" //add, foobar, x, y, ...
-	INT    = "INT"   //123456
-	STRING = "STRING"
+	IDENT   = "IDENT" //add, foobar, x, y, ...
+	INT     = "INT"   //123456
+	STRING  = "STRING"
+	COMMENT = "COMMENT"
 
 	// Operators
 	ASSIGN   = "="
@@ -23,6 +24,7 @@ const (
 	BANG     = "!"
 	ASTERISK = "*"
 	SLASH    = "/"
+	MODULO   = "%"
 
 	LT = "<"
 	GT = ">"

@@ -1,10 +1,11 @@
 package evaluator
 
 import (
+	"testing"
+
 	"github.com/emilkloeden/monkey/lexer"
 	"github.com/emilkloeden/monkey/object"
 	"github.com/emilkloeden/monkey/parser"
-	"testing"
 )
 
 func TestEvalIntegerExpression(t *testing.T) {
@@ -21,12 +22,14 @@ func TestEvalIntegerExpression(t *testing.T) {
 		{"-50 + 100 + -50", 0},
 		{"5 * 2 + 10", 20},
 		{"5 + 2 * 10", 25},
+		{"3 % 2", 1},
 		{"20 + 2 * -10", 0},
 		{"50 / 2 * 2 + 10", 60},
 		{"2 * (5 + 10)", 30},
 		{"3 * 3 * 3 + 10", 37},
 		{"3 * (3 * 3) + 10", 37},
 		{"(5 + 10 * 2 + 15 / 3) * 2 + -10", 50},
+		{"(5 + 10 * 2 + 15 / 3) * 2 + -10 % 2", 60},
 	}
 
 	for _, tt := range tests {

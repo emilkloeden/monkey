@@ -64,9 +64,17 @@ func (l *Lexer) NextToken() token.Token {
 			tok = newToken(token.BANG, l.ch)
 		}
 	case '/':
-		tok = newToken(token.SLASH, l.ch)
+		if l.peekChar() == '/' {
+			l.readChar() // skip over the next '/' char
+			tok.Type = token.COMMENT
+			tok.Literal = l.readLine()
+		} else {
+			tok = newToken(token.SLASH, l.ch)
+		}
 	case '*':
 		tok = newToken(token.ASTERISK, l.ch)
+	case '%':
+		tok = newToken(token.MODULO, l.ch)
 	case '<':
 		tok = newToken(token.LT, l.ch)
 	case '>':
@@ -138,6 +146,17 @@ func (l *Lexer) readNumber() string {
 	position := l.position
 	for isDigit(l.ch) {
 		l.readChar()
+	}
+	return l.input[position:l.position]
+}
+
+func (l *Lexer) readLine() string {
+	position := l.position + 1
+	for {
+		l.readChar()
+		if l.ch == '\r' || l.ch == '\n' || l.ch == 0 {
+			break
+		}
 	}
 	return l.input[position:l.position]
 }

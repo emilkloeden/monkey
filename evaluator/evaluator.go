@@ -2,6 +2,7 @@ package evaluator
 
 import (
 	"fmt"
+
 	"github.com/emilkloeden/monkey/ast"
 	"github.com/emilkloeden/monkey/object"
 )
@@ -209,6 +210,8 @@ func evalIntegerInfixExpression(
 		return &object.Integer{Value: leftVal * rightVal}
 	case "/":
 		return &object.Integer{Value: leftVal / rightVal}
+	case "%":
+		return &object.Integer{Value: leftVal % rightVal}
 	case "<":
 		return nativeBoolToBooleanObject(leftVal < rightVal)
 	case ">":

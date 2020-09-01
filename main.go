@@ -4,13 +4,14 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"os"
+	"os/user"
+
 	"github.com/emilkloeden/monkey/evaluator"
 	"github.com/emilkloeden/monkey/lexer"
 	"github.com/emilkloeden/monkey/object"
 	"github.com/emilkloeden/monkey/parser"
 	"github.com/emilkloeden/monkey/repl"
-	"os"
-	"os/user"
 )
 
 func main() {
@@ -42,9 +43,12 @@ func main() {
 		program := p.ParseProgram()
 
 		env := object.NewEnvironment()
-		result := evaluator.Eval(program, env)
 
-		fmt.Println(result.Inspect())
+		// hacky way to handle not returning anything
+		// on the final line of a program
+		result, ok := evaluator.Eval(program, env).(object.Object)
+		if ok && result.Type() != "NULL" {
+			fmt.Println(result.Inspect())
+		}
 	}
-
 }

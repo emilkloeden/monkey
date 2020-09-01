@@ -2,10 +2,11 @@ package parser
 
 import (
 	"fmt"
+	"strconv"
+
 	"github.com/emilkloeden/monkey/ast"
 	"github.com/emilkloeden/monkey/lexer"
 	"github.com/emilkloeden/monkey/token"
-	"strconv"
 )
 
 const (
@@ -15,6 +16,7 @@ const (
 	LESSGREATER // > or <
 	SUM         // +
 	PRODUCT     // *
+	MODULO      // %
 	PREFIX      // -X or !X
 	CALL        // myFunction(X)
 	INDEX       // array[index]
@@ -29,6 +31,7 @@ var precedences = map[token.TokenType]int{
 	token.MINUS:    SUM,
 	token.SLASH:    PRODUCT,
 	token.ASTERISK: PRODUCT,
+	token.MODULO:   MODULO,
 	token.LPAREN:   CALL,
 	token.LBRACKET: INDEX,
 }
@@ -74,6 +77,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.MINUS, p.parseInfixExpression)
 	p.registerInfix(token.SLASH, p.parseInfixExpression)
 	p.registerInfix(token.ASTERISK, p.parseInfixExpression)
+	p.registerInfix(token.MODULO, p.parseInfixExpression)
 	p.registerInfix(token.EQ, p.parseInfixExpression)
 	p.registerInfix(token.NOT_EQ, p.parseInfixExpression)
 	p.registerInfix(token.LT, p.parseInfixExpression)
@@ -114,6 +118,8 @@ func (p *Parser) ParseProgram() *ast.Program {
 
 func (p *Parser) parseStatement() ast.Statement {
 	switch p.curToken.Type {
+	case token.COMMENT:
+		return p.parseCommentStatement()
 	case token.LET:
 		return p.parseLetStatement()
 	case token.RETURN:
@@ -121,6 +127,10 @@ func (p *Parser) parseStatement() ast.Statement {
 	default:
 		return p.parseExpressionStatement()
 	}
+}
+
+func (p *Parser) parseCommentStatement() ast.Statement {
+	return &ast.Comment{Token: p.curToken, Value: p.curToken.Literal}
 }
 
 func (p *Parser) parseLetStatement() *ast.LetStatement {

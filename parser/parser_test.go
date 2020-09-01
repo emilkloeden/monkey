@@ -2,9 +2,10 @@ package parser
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/emilkloeden/monkey/ast"
 	"github.com/emilkloeden/monkey/lexer"
-	"testing"
 )
 
 func TestLetStatements(t *testing.T) {
@@ -237,6 +238,7 @@ func TestParsingInfixExpressions(t *testing.T) {
 		{"5 / 5;", 5, "/", 5},
 		{"5 > 5;", 5, ">", 5},
 		{"5 < 5;", 5, "<", 5},
+		{"3 % 2;", 3, "%", 2},
 		{"5 == 5;", 5, "==", 5},
 		{"5 != 5;", 5, "!=", 5},
 		{"foobar + barfoo;", "foobar", "+", "barfoo"},
@@ -381,6 +383,10 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 		{
 			"add(a * b[2], b[1], 2 * [1, 2][1])",
 			"add((a * (b[2])), (b[1]), (2 * ([1, 2][1])))",
+		},
+		{
+			"-(5 + 5) // + 20",
+			"(-(5 + 5))// + 20",
 		},
 	}
 	for _, tt := range tests {

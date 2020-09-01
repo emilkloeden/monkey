@@ -31,6 +31,10 @@ let arr = [ 1, 2, 3]
 let doubled = map(arr, fn(x) {x * 2})
 let summed = sum(doubled)
 
+let m = 2 % 2 == 0
+
+// a comment
+
 puts("Array: ")
 puts(arr)
 puts("Doubled: ")
@@ -38,4 +42,6 @@ puts(doubled)
 puts("Summed: ")
 puts(summed)
 puts("Less than 5: ")
-puts("TBD")
+puts("TBD") // a comment afterwards
+puts(m)
+// final comment; puts(m);
