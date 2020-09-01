@@ -1,4 +1,4 @@
-# Simian
+# Monkey
 
 Yet another monkey-lang interpreter. Based off of interpreterbook.com, monkey-lang.org.
 
