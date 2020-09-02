@@ -35,6 +35,12 @@ let m = 2 % 2 == 0
 
 // a comment
 
+let combined = arr + doubled;
+
+let hash = {1: "hello", "two": "world"};
+let hashKeys = keys(hash)
+let hashValues = values(hash)
+
 puts("Array: ")
 puts(arr)
 puts("Doubled: ")
@@ -45,3 +51,20 @@ puts("Less than 5: ")
 puts("TBD") // a comment afterwards
 puts(m)
 // final comment; puts(m);
+puts("Combined: ")
+puts(combined)
+
+puts("Join 1 array:")
+puts(join(arr, "~"))
+
+puts("Join 2 arrays:")
+puts(join([arr, doubled],"~"))
+
+puts("Hash:")
+puts(hash)
+
+puts("Keys:")
+puts(hashKeys)
+
+puts("Values:")
+puts(hashValues)

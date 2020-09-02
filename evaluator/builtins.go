@@ -1,7 +1,10 @@
 package evaluator
 
 import (
+	"bytes"
 	"fmt"
+	"strings"
+
 	"github.com/emilkloeden/monkey/object"
 )
 
@@ -109,6 +112,115 @@ var builtins = map[string]*object.Builtin{
 				fmt.Println(arg.Inspect())
 			}
 			return NULL
+		},
+	},
+	"join": &object.Builtin{
+		Fn: func(args ...object.Object) object.Object {
+			if len(args) != 2 {
+				return newError("wrong number of arguments. got=%d, want=2",
+					len(args))
+			}
+			if args[0].Type() != object.ARRAY_OBJ {
+				return newError("first argument to `join` must be ARRAY, got %s",
+					args[0].Type())
+			}
+			if args[1].Type() != object.STRING_OBJ {
+				return newError("second argument to `join` must be STRING, got %s",
+					args[1].Type())
+			}
+
+			array, ok := args[0].(*object.Array)
+			if !ok {
+				return newError("first argument to `join` must be ARRAY, got=%T(%+v)", args[0], args[0])
+			}
+			arrayElements := array.Elements
+			var out bytes.Buffer
+			length := len(arrayElements)
+
+			if length == 0 {
+				return &object.String{Value: ""}
+			}
+
+			if length == 1 {
+				return &object.String{Value: arrayElements[0].Inspect()}
+			}
+
+			max := length - 1
+
+			for idx, el := range arrayElements {
+				out.WriteString(el.Inspect())
+				if idx < max {
+					out.WriteString(args[1].Inspect())
+				}
+			}
+			return &object.String{Value: out.String()}
+		},
+	},
+	"split": &object.Builtin{
+		Fn: func(args ...object.Object) object.Object {
+			if len(args) != 2 {
+				return newError("wrong number of arguments. got=%d, want=2",
+					len(args))
+			}
+
+			str, ok := args[0].(*object.String)
+			if !ok {
+				return newError("first argument to `split` must be STRING, got=%T(%+v)", args[0], args[0])
+			}
+
+			delim, ok := args[1].(*object.String)
+			if !ok {
+				return newError("second argument to `split` must be STRING, got=%T(%+v)", args[0], args[0])
+			}
+
+			elements := strings.Split(str.Value, delim.Value)
+			strElements := make([]object.Object, 0)
+
+			for _, el := range elements {
+				strElements = append(strElements, &object.String{Value: el})
+			}
+
+			return &object.Array{Elements: strElements}
+		},
+	},
+	"keys": &object.Builtin{
+		Fn: func(args ...object.Object) object.Object {
+			if len(args) != 1 {
+				return newError("wrong number of arguments. got=%d, want=1",
+					len(args))
+			}
+
+			hash, ok := args[0].(*object.Hash)
+			if !ok {
+				return newError("argument to `keys` must be HASH, got=%T(%+v)", args[0], args[0])
+			}
+
+			keys := make([]object.Object, 0, len(hash.Pairs))
+			for _, v := range hash.Pairs {
+				keys = append(keys, v.Key)
+			}
+
+			return &object.Array{Elements: keys}
+		},
+	},
+	"values": &object.Builtin{
+		Fn: func(args ...object.Object) object.Object {
+			if len(args) != 1 {
+				return newError("wrong number of arguments. got=%d, want=1",
+					len(args))
+			}
+
+			hash, ok := args[0].(*object.Hash)
+			if !ok {
+				return newError("argument to `values` must be HASH, got=%T(%+v)", args[0], args[0])
+			}
+
+			values := make([]object.Object, 0, len(hash.Pairs))
+			for _, v := range hash.Pairs {
+				values = append(values, v.Value)
+			}
+
+			return &object.Array{Elements: values}
 		},
 	},
 }

@@ -340,6 +340,96 @@ func TestStringConcatenation(t *testing.T) {
 	}
 }
 
+func TestJoinFunction(t *testing.T) {
+	input := `join([1,2,3],".")`
+	expected := "1.2.3"
+
+	evaluated := testEval(input)
+
+	str, ok := evaluated.(*object.String)
+	if !ok {
+		t.Fatalf("object is not String. got=%T (%+v)", evaluated, evaluated)
+	}
+	if str.Value != expected {
+		t.Errorf("String has wrong value. got=%q, want=%s", str.Value, expected)
+	}
+
+}
+
+func TestSplitFunction(t *testing.T) {
+	input := `split("1.2.3",".")`
+	evaluated := testEval(input)
+
+	array, ok := evaluated.(*object.Array)
+	if !ok {
+		t.Fatalf("object is not Array. got=%T (%+v)", evaluated, evaluated)
+	}
+	if len(array.Elements) != 3 {
+		t.Fatalf("array has wrong num of elements. got=%d",
+			len(array.Elements))
+	}
+
+	expected := []string{"1", "2", "3"}
+
+	for i, obj := range array.Elements {
+		str, ok := obj.(*object.String)
+		if !ok {
+			t.Fatalf("object is not a String. got=%T (%+v)", obj, obj)
+		}
+		if str.Value != expected[i] {
+			t.Fatalf("Incorrect value at position %d. got='%s', want='%s'", i, str.Value, expected[i])
+		}
+	}
+}
+
+func TestKeysFunction(t *testing.T) {
+	input := `keys({"hello" : 1, "world": "2"})`
+	evaluated := testEval(input)
+	result, ok := evaluated.(*object.Array)
+	if !ok {
+		t.Fatalf("object is not Array. got=%T (%+v)", evaluated, evaluated)
+	}
+	if len(result.Elements) != 2 {
+		t.Fatalf("array has wrong num of elements. got=%d, want 2",
+			len(result.Elements))
+	}
+	expected := []string{"hello", "world"}
+
+	for i, obj := range result.Elements {
+		str, ok := obj.(*object.String)
+		if !ok {
+			t.Fatalf("object is not a String. got=%T (%+v)", obj, obj)
+		}
+		if str.Value != expected[i] {
+			t.Errorf("Incorrect value at position %d. got='%s', want='%s'", i, str.Value, expected[i])
+		}
+	}
+}
+
+func TestValuesFunction(t *testing.T) {
+	input := `values({"hello" : 1, "world": 2})`
+	evaluated := testEval(input)
+	result, ok := evaluated.(*object.Array)
+	if !ok {
+		t.Fatalf("object is not Array. got=%T (%+v)", evaluated, evaluated)
+	}
+	if len(result.Elements) != 2 {
+		t.Fatalf("array has wrong num of elements. got=%d, want 2",
+			len(result.Elements))
+	}
+	expected := []int64{1, 2}
+
+	for i, obj := range result.Elements {
+		str, ok := obj.(*object.Integer)
+		if !ok {
+			t.Fatalf("object is not an Integer. got=%T (%+v)", obj, obj)
+		}
+		if str.Value != expected[i] {
+			t.Errorf("Incorrect value at position %d. got='%d', want='%d'", i, str.Value, expected[i])
+		}
+	}
+}
+
 func TestBuiltinFunctions(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -444,6 +534,24 @@ func TestArrayIndexExpressions(t *testing.T) {
 			testNullObject(t, evaluated)
 		}
 	}
+}
+
+func TestArrayConcatenation(t *testing.T) {
+	input := "[1, 2, 3] + [0, 10]"
+	evaluated := testEval(input)
+	result, ok := evaluated.(*object.Array)
+	if !ok {
+		t.Fatalf("object is not Array. got=%T (%+v)", evaluated, evaluated)
+	}
+	if len(result.Elements) != 5 {
+		t.Fatalf("array has wrong num of elements. got=%d, want=5",
+			len(result.Elements))
+	}
+	testIntegerObject(t, result.Elements[0], 1)
+	testIntegerObject(t, result.Elements[1], 2)
+	testIntegerObject(t, result.Elements[2], 3)
+	testIntegerObject(t, result.Elements[3], 0)
+	testIntegerObject(t, result.Elements[4], 10)
 }
 
 func TestHashLiterals(t *testing.T) {
