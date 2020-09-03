@@ -1,6 +1,7 @@
 package evaluator
 
 import (
+	"os"
 	"testing"
 
 	"github.com/emilkloeden/monkey/lexer"
@@ -40,7 +41,11 @@ func TestEvalIntegerExpression(t *testing.T) {
 
 func testEval(input string) object.Object {
 	l := lexer.New(input)
-	p := parser.New(l)
+	cwd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	p := parser.New(l, cwd)
 	program := p.ParseProgram()
 	env := object.NewEnvironment()
 
