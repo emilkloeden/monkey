@@ -2,9 +2,13 @@ package evaluator
 
 import (
 	"fmt"
+	"io/ioutil"
+	"path"
 
 	"github.com/emilkloeden/monkey/ast"
+	"github.com/emilkloeden/monkey/lexer"
 	"github.com/emilkloeden/monkey/object"
+	"github.com/emilkloeden/monkey/parser"
 )
 
 var (
@@ -101,6 +105,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return index
 		}
 		return evalIndexExpression(left, index)
+	case *ast.ImportExpression:
+		return evalImportExpression(node, env)
 	}
 	return nil
 }
@@ -268,6 +274,8 @@ func evalIndexExpression(left, index object.Object) object.Object {
 		return evalArrayIndexExpression(left, index)
 	case left.Type() == object.HASH_OBJ:
 		return evalHashIndexExpression(left, index)
+	case left.Type() == object.MODULE:
+		return evalModuleIndexExpression(left, index)
 	default:
 		return newError("index operator not supported: %s", left.Type())
 	}
@@ -327,6 +335,11 @@ func evalHashIndexExpression(hash, index object.Object) object.Object {
 	}
 
 	return pair.Value
+}
+
+func evalModuleIndexExpression(module, index object.Object) object.Object {
+	moduleObject := module.(*object.Module)
+	return evalHashIndexExpression(moduleObject.Attrs, index)
 }
 
 func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Object {
@@ -450,4 +463,60 @@ func unwrapReturnValue(obj object.Object) object.Object {
 	}
 
 	return obj
+}
+
+func EvalModule(name string) object.Object {
+	// TODO: check filename validity before this...
+	dir := path.Dir(name)
+	b, err := ioutil.ReadFile(name)
+	if err != nil {
+		return newError("IOError: error reading module '%s': %s", name, err)
+	}
+
+	l := lexer.New(string(b))
+	p := parser.New(l, dir)
+
+	module := p.ParseProgram()
+
+	if len(p.Errors()) != 0 {
+		return newError("ParseError: %s", p.Errors())
+	}
+
+	env := object.NewEnvironment()
+	Eval(module, env)
+
+	return env.ExportedHash()
+}
+
+func evalImportExpression(ie *ast.ImportExpression, env *object.Environment) object.Object {
+	var moduleName string
+	s, ok := ie.Name.(*ast.StringLiteral)
+	if !ok {
+		return newError("Import Error: Unable to cast ImportExpression.Name to ast.StringLiteral")
+	}
+
+	// if import(/absolute/path)
+	if path.IsAbs(s.Value) {
+		moduleName = s.Value
+	} else {
+		// else join with requesting file's path
+		moduleName = path.Join(ie.Requestor, s.Value)
+	}
+	moduleLocationObj := &ast.StringLiteral{Value: moduleName}
+
+	// Evaluate module location node
+	name := Eval(moduleLocationObj, env)
+	if isError(name) {
+		return name
+	}
+
+	// Evaluate module
+	if s, ok := name.(*object.String); ok {
+		attrs := EvalModule(s.Value)
+		if isError(attrs) {
+			return attrs
+		}
+		return &object.Module{Name: s.Value, Attrs: attrs}
+	}
+	return newError("ImportError: invalid import path '%s'", name)
 }

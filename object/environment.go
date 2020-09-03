@@ -28,3 +28,13 @@ func (e *Environment) Set(name string, val Object) Object {
 	e.store[name] = val
 	return val
 }
+
+func (e *Environment) ExportedHash() *Hash {
+	pairs := make(map[HashKey]HashPair)
+	for k, v := range e.store {
+		s := &String{Value: k}
+		pairs[s.HashKey()] = HashPair{Key: s, Value: v}
+
+	}
+	return &Hash{Pairs: pairs}
+}

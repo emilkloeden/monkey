@@ -45,6 +45,8 @@ type Parser struct {
 	l      *lexer.Lexer
 	errors []string
 
+	currentDir string
+
 	curToken  token.Token
 	peekToken token.Token
 
@@ -52,10 +54,11 @@ type Parser struct {
 	infixParseFns  map[token.TokenType]infixParseFn
 }
 
-func New(l *lexer.Lexer) *Parser {
+func New(l *lexer.Lexer, currentDir string) *Parser {
 	p := &Parser{
-		l:      l,
-		errors: []string{},
+		l:          l,
+		currentDir: currentDir,
+		errors:     []string{},
 	}
 
 	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
@@ -71,6 +74,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.STRING, p.parseStringLiteral)
 	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)
 	p.registerPrefix(token.LBRACE, p.parseHashLiteral)
+	p.registerPrefix(token.IMPORT, p.parseImportExpression)
 
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
@@ -131,6 +135,23 @@ func (p *Parser) parseStatement() ast.Statement {
 
 func (p *Parser) parseCommentStatement() ast.Statement {
 	return &ast.Comment{Token: p.curToken, Value: p.curToken.Literal}
+}
+
+func (p *Parser) parseImportExpression() ast.Expression {
+	expression := &ast.ImportExpression{Token: p.curToken, Requestor: p.currentDir}
+
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+	p.nextToken()
+	expression.Name = p.parseExpression(LOWEST)
+
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+
+	return expression
+
 }
 
 func (p *Parser) parseLetStatement() *ast.LetStatement {

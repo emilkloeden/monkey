@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"os"
+
 	"github.com/emilkloeden/monkey/evaluator"
 	"github.com/emilkloeden/monkey/lexer"
 	"github.com/emilkloeden/monkey/object"
@@ -25,7 +27,11 @@ func Start(in io.Reader, out io.Writer) {
 
 		line := scanner.Text()
 		l := lexer.New(line)
-		p := parser.New(l)
+		cwd, err := os.Getwd()
+		if err != nil {
+			panic(err)
+		}
+		p := parser.New(l, cwd)
 
 		program := p.ParseProgram()
 		if len(p.Errors()) != 0 {

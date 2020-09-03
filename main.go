@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 	"os/user"
+	"path"
+	"path/filepath"
 
 	"github.com/emilkloeden/monkey/evaluator"
 	"github.com/emilkloeden/monkey/lexer"
@@ -31,15 +33,24 @@ func main() {
 			fmt.Println("Incorrect usage. Usage `monkey filePath`")
 		}
 
-		filePath := flag.Args()[0]
-		contents, err := ioutil.ReadFile(filePath)
+		fileName := flag.Args()[0]
+		absolutePath, err := filepath.Abs(fileName)
+
+		if err != nil {
+			panic(err)
+		}
+		fmt.Printf("Loading... %s\n\n", absolutePath)
+		fileDir := path.Dir(absolutePath)
+		fmt.Printf("From... %s\n\n", fileDir)
+
+		contents, err := ioutil.ReadFile(fileName)
 
 		if err != nil {
 			fmt.Printf("Failure to read file '%s'. Err: '%s'",
 				string(contents), err)
 		}
 		l := lexer.New(string(contents))
-		p := parser.New(l)
+		p := parser.New(l, fileDir)
 		program := p.ParseProgram()
 
 		env := object.NewEnvironment()

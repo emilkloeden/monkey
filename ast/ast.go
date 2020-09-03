@@ -2,6 +2,7 @@ package ast
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 
 	"github.com/emilkloeden/monkey/token"
@@ -350,6 +351,25 @@ func (hl *HashLiteral) String() string {
 	out.WriteString("{")
 	out.WriteString(strings.Join(pairs, ", "))
 	out.WriteString("}")
+
+	return out.String()
+}
+
+type ImportExpression struct {
+	Token     token.Token // The 'import' token
+	Name      Expression
+	Requestor string
+}
+
+func (ie *ImportExpression) expressionNode()      {}
+func (ie *ImportExpression) TokenLiteral() string { return ie.Token.Literal }
+func (ie *ImportExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(ie.TokenLiteral())
+	out.WriteString("(")
+	out.WriteString(fmt.Sprintf("\"%s\"", ie.Name))
+	out.WriteString(")")
 
 	return out.String()
 }

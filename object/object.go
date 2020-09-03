@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"hash/fnv"
-	"github.com/emilkloeden/monkey/ast"
 	"strings"
+
+	"github.com/emilkloeden/monkey/ast"
 )
 
 type ObjectType string
@@ -21,6 +22,7 @@ const (
 	BUILTIN_OBJ      = "BUILTIN"
 	ARRAY_OBJ        = "ARRAY"
 	HASH_OBJ         = "HASH"
+	MODULE           = "MODULE"
 )
 
 type Object interface {
@@ -179,3 +181,27 @@ func (h *Hash) Inspect() string {
 type Hashable interface {
 	HashKey() HashKey
 }
+
+// Module is the module type used to represent a collection of variabels.
+type Module struct {
+	Name  string
+	Attrs Object
+}
+
+func (m *Module) Bool() bool {
+	return true
+}
+
+func (m *Module) Compare(other Object) int {
+	return 1
+}
+
+func (m *Module) String() string {
+	return m.Inspect()
+}
+
+// Type returns the type of the object
+func (m *Module) Type() ObjectType { return MODULE }
+
+// Inspect returns a stringified version of the object for debugging
+func (m *Module) Inspect() string { return fmt.Sprintf("<module '%s: %s'>", m.Name, m.Attrs) }

@@ -3,6 +3,7 @@ package evaluator
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/emilkloeden/monkey/object"
@@ -114,6 +115,12 @@ var builtins = map[string]*object.Builtin{
 			return NULL
 		},
 	},
+	"exit": &object.Builtin{
+		Fn: func(args ...object.Object) object.Object {
+			os.Exit(0)
+			return NULL
+		},
+	},
 	"join": &object.Builtin{
 		Fn: func(args ...object.Object) object.Object {
 			if len(args) != 2 {
@@ -185,14 +192,22 @@ var builtins = map[string]*object.Builtin{
 	},
 	"keys": &object.Builtin{
 		Fn: func(args ...object.Object) object.Object {
+			var hash *object.Hash
 			if len(args) != 1 {
 				return newError("wrong number of arguments. got=%d, want=1",
 					len(args))
 			}
-
-			hash, ok := args[0].(*object.Hash)
-			if !ok {
-				return newError("argument to `keys` must be HASH, got=%T(%+v)", args[0], args[0])
+			switch args[0].Type() {
+			case object.HASH_OBJ:
+				hash = args[0].(*object.Hash)
+			case object.MODULE:
+				module, ok := args[0].(*object.Module)
+				if !ok {
+					return newError("argument to `keys` must be HASH or MODULE, got=%T(%+v)", args[0], args[0])
+				}
+				hash = module.Attrs.(*object.Hash)
+			default:
+				return newError("argument to `keys` must be HASH or MODULE, got=%T(%+v)", args[0], args[0])
 			}
 
 			keys := make([]object.Object, 0, len(hash.Pairs))
@@ -205,14 +220,23 @@ var builtins = map[string]*object.Builtin{
 	},
 	"values": &object.Builtin{
 		Fn: func(args ...object.Object) object.Object {
+			var hash *object.Hash
 			if len(args) != 1 {
 				return newError("wrong number of arguments. got=%d, want=1",
 					len(args))
 			}
 
-			hash, ok := args[0].(*object.Hash)
-			if !ok {
-				return newError("argument to `values` must be HASH, got=%T(%+v)", args[0], args[0])
+			switch args[0].Type() {
+			case object.HASH_OBJ:
+				hash = args[0].(*object.Hash)
+			case object.MODULE:
+				module, ok := args[0].(*object.Module)
+				if !ok {
+					return newError("argument to `keys` must be HASH or MODULE, got=%T(%+v)", args[0], args[0])
+				}
+				hash = module.Attrs.(*object.Hash)
+			default:
+				return newError("argument to `keys` must be HASH or MODULE, got=%T(%+v)", args[0], args[0])
 			}
 
 			values := make([]object.Object, 0, len(hash.Pairs))
