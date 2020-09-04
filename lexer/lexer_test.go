@@ -33,6 +33,7 @@ func TestNextToken(t *testing.T) {
 	3 % 2
 	let a = 1; // bye
 	let hello = import("./hello.mo");
+	true || false && true;
 	`
 
 	tests := []struct {
@@ -141,6 +142,12 @@ func TestNextToken(t *testing.T) {
 		{token.LPAREN, "("},
 		{token.STRING, "./hello.mo"},
 		{token.RPAREN, ")"},
+		{token.SEMICOLON, ";"},
+		{token.TRUE, "true"},
+		{token.OR, "||"},
+		{token.FALSE, "false"},
+		{token.AND, "&&"},
+		{token.TRUE, "true"},
 		{token.SEMICOLON, ";"},
 
 		{token.EOF, ""},

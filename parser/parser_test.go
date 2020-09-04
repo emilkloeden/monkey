@@ -224,6 +224,8 @@ func TestParsingInfixExpressions(t *testing.T) {
 		{"3 % 2;", 3, "%", 2},
 		{"5 == 5;", 5, "==", 5},
 		{"5 != 5;", 5, "!=", 5},
+		{"true && false;", true, "&&", false},
+		{"true || false;", true, "||", false},
 		{"foobar + barfoo;", "foobar", "+", "barfoo"},
 		{"foobar - barfoo;", "foobar", "-", "barfoo"},
 		{"foobar * barfoo;", "foobar", "*", "barfoo"},
@@ -381,7 +383,7 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 func testIdentifier(t *testing.T, exp ast.Expression, value string) bool {
 	ident, ok := exp.(*ast.Identifier)
 	if !ok {
-		t.Errorf("exp not *ast.Identifier. got=%T", exp)
+		t.Errorf("exp not *ast.Identifier. got=%T(%+v)", exp, exp)
 		return false
 	}
 	if ident.Value != value {

@@ -43,6 +43,19 @@ type Boolean struct {
 
 func (b *Boolean) Type() ObjectType { return BOOLEAN_OBJ }
 func (b *Boolean) Inspect() string  { return fmt.Sprintf("%t", b.Value) }
+func (b *Boolean) Int() int {
+	if b.Value {
+		return 1
+	}
+	return 0
+}
+
+func (b *Boolean) Compare(other Object) int {
+	if obj, ok := other.(*Boolean); ok {
+		return b.Int() - obj.Int()
+	}
+	return 1
+}
 
 type Null struct{}
 

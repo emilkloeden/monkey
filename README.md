@@ -19,6 +19,7 @@ Most of this could not have been achieved without additional help, in particular
 1. Additional operators and operations
     - modulus `// 3 % 2 = 1`
     - comments `// single line comments only`
+    - boolean AND and OR `// true && false || true`
     - Array concatenation (`[1,2] + [3] // [1,2,3]`)
 1. Additional Builtins
     - String functions
