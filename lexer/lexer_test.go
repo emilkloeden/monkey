@@ -134,7 +134,7 @@ func TestNextToken(t *testing.T) {
 		{token.ASSIGN, "="},
 		{token.INT, "1"},
 		{token.SEMICOLON, ";"},
-		{token.COMMENT, "//"},
+		{token.COMMENT, " bye"},
 		{token.LET, "let"},
 		{token.IDENT, "hello"},
 		{token.ASSIGN, "="},
@@ -160,6 +160,10 @@ func TestNextToken(t *testing.T) {
 		if tok.Type != tt.expectedType {
 			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q",
 				i, tt.expectedType, tok.Type)
+		}
+		if tok.Literal != tt.expectedLiteral {
+			t.Fatalf("tests[%d] - wrong literal. expected=%q, got=%q",
+				i, tt.expectedLiteral, tok.Literal)
 		}
 
 	}
